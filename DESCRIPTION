@@ -1,0 +1,21 @@
+Package: shinyTooltips
+Title: Modern, Customizable Interactive Tooltips for Shiny
+Version: 0.1.0
+Authors@R: 
+    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
+Description: A lightweight framework for creating modern, customizable, interactive 
+    tooltips in Shiny applications. Replaces static HTML title attributes and 
+    bulky JavaScript tooltip frameworks with a clean, declarative R API. Supports 
+    multiple placements, triggers (hover, click, focus), and smooth animations.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports:
+    shiny (>= 1.7.0),
+    htmltools (>= 0.5.0),
+    jsonlite (>= 1.8.0)
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

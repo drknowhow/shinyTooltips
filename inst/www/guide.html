@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shinyTooltips - Interactive Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .guide-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3d566e 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        header .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        header .version {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        nav {
+            display: flex;
+            gap: 0;
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+            overflow-x: auto;
+        }
+        
+        nav button {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        nav button:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        nav button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        h2 {
+            color: #2c3e50;
+            font-size: 32px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        h3 {
+            color: #34495e;
+            font-size: 22px;
+            margin: 30px 0 15px 0;
+        }
+        
+        h4 {
+            color: #555;
+            font-size: 16px;
+            margin: 20px 0 10px 0;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+            color: #555;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .tip {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .warning {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #d63384;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            border-left: 4px solid #667eea;
+            position: relative;
+        }
+        
+        .code-block::before {
+            content: attr(data-language);
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 11px;
+            color: #95a5a6;
+            text-transform: uppercase;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 60px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            background: #764ba2;
+        }
+        
+        .copy-btn.copied {
+            background: #27ae60;
+        }
+        
+        .parameter-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .parameter-table thead {
+            background: #f8f9fa;
+        }
+        
+        .parameter-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            color: #2c3e50;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .parameter-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .parameter-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .parameter-table code {
+            background: #fff;
+            color: #d63384;
+        }
+        
+        .param-name {
+            font-weight: 700;
+            color: #667eea;
+            font-family: monospace;
+        }
+        
+        .param-type {
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .example-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .example-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .example-card h4 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        
+        .example-card p {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .example-code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            overflow-x: auto;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .feature-item .icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .feature-item h4 {
+            margin: 0;
+            color: white;
+        }
+        
+        .feature-item p {
+            margin: 8px 0 0 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 10px;
+            margin-bottom: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        
+        .checklist li::before {
+            content: "✓ ";
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .troubleshooting {
+            margin: 20px 0;
+        }
+        
+        .troubleshooting-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 15px;
+        }
+        
+        .troubleshooting-item.question {
+            background: #fff;
+            border-left: 4px solid #667eea;
+        }
+        
+        .troubleshooting-item.answer {
+            background: #f8f9fa;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .troubleshooting-item strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            border-top: 3px solid #667eea;
+        }
+        
+        footer p {
+            color: #ecf0f1;
+            margin-bottom: 10px;
+        }
+        
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        footer a:hover {
+            color: #8fa3ff;
+        }
+        
+        .installation-steps {
+            counter-reset: step-counter;
+            list-style: none;
+            padding: 0;
+        }
+        
+        .installation-steps li {
+            counter-increment: step-counter;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            position: relative;
+        }
+        
+        .installation-steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: -30px;
+            top: -12px;
+            background: #667eea;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        strong {
+            color: #2c3e50;
+        }
+        
+        em {
+            color: #666;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                padding: 40px 20px;
+            }
+            
+            header h1 {
+                font-size: 32px;
+            }
+            
+            nav {
+                flex-direction: column;
+            }
+            
+            nav button {
+                min-width: auto;
+                border-bottom: 3px solid transparent;
+                border-right: 3px solid transparent;
+            }
+            
+            nav button.active {
+                border-bottom-color: transparent;
+                border-right-color: #667eea;
+                border-bottom: 3px solid transparent;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .example-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-list {
+                grid-template-columns: 1fr;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+            
+            code {
+                word-break: break-all;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="guide-container">
+        <header>
+            <h1>📚 shinyTooltips</h1>
+            <p class="subtitle">Interactive Guide & Documentation</p>
+            <span class="version">v0.2.0</span>
+        </header>
+        
+        <nav>
+            <button class="nav-btn active" data-section="overview">Overview</button>
+            <button class="nav-btn" data-section="getting-started">Getting Started</button>
+            <button class="nav-btn" data-section="api-reference">API Reference</button>
+            <button class="nav-btn" data-section="examples">Examples</button>
+            <button class="nav-btn" data-section="best-practices">Best Practices</button>
+            <button class="nav-btn" data-section="faq">FAQ & Troubleshooting</button>
+        </nav>
+        
+        <div class="content">
+            <!-- Overview Section -->
+            <section id="overview" class="section active">
+                <h2>Overview</h2>
+                
+                <p>
+                    <strong>shinyTooltips</strong> is a lightweight, modern library for adding interactive tooltips to Shiny applications.
+                    It provides a simple yet powerful API for creating customizable, accessible tooltips with minimal configuration.
+                </p>
+                
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="icon">🎯</div>
+                        <h4>Simple API</h4>
+                        <p>Intuitive, declarative syntax</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="icon">📍</div>
+                        <h4>Flexible Placement</h4>
+                        <p>Top, bottom, left, right</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="icon">⚡</div>
+                        <h4>Lightweight</h4>
+                        <p>Only 13KB unminified</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="icon">🎨</div>
+                        <h4>Customizable</h4>
+                        <p>Themes, sizes, styles</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="icon">♿</div>
+                        <h4>Accessible</h4>
+                        <p>WCAG compliant</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="icon">🔧</div>
+                        <h4>Interactive</h4>
+                        <p>Support for inputs & forms</p>
+                    </div>
+                </div>
+                
+                <h3>Key Features</h3>
+                <ul>
+                    <li><strong>Multiple Placements:</strong> Tooltips can appear above, below, to the left, or to the right of target elements</li>
+                    <li><strong>Multiple Triggers:</strong> Support for hover, click, and focus triggers</li>
+                    <li><strong>Rich Content:</strong> Use HTML, text, or complex Shiny tagLists as tooltip content</li>
+                    <li><strong>Customizable Styling:</strong> Apply custom CSS styles, predefined sizes, or use theme customization</li>
+                    <li><strong>Animations:</strong> Smooth fade or scale animations</li>
+                    <li><strong>Interactive Mode:</strong> Create tooltips with inputs and interactive controls</li>
+                    <li><strong>Smart Positioning:</strong> Automatically adjusts position to avoid viewport overflow</li>
+                    <li><strong>No Dependencies:</strong> Pure JavaScript, no jQuery required</li>
+                </ul>
+                
+                <h3>What Problems Does It Solve?</h3>
+                <p>
+                    Shiny tooltips are commonly needed for:
+                </p>
+                <ul>
+                    <li>Providing contextual help and hints for form inputs</li>
+                    <li>Explaining button functionality without cluttering the UI</li>
+                    <li>Displaying additional information on hover</li>
+                    <li>Creating interactive tooltips with forms or controls</li>
+                    <li>Improving user experience with minimal space overhead</li>
+                </ul>
+            </section>
+            
+            <!-- Getting Started Section -->
+            <section id="getting-started" class="section">
+                <h2>Getting Started</h2>
+                
+                <h3>Installation</h3>
+                <p>Install directly from GitHub using the <code>devtools</code> package:</p>
+                <div class="code-block" data-language="r">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    devtools::install_github("yourusername/shinyTooltips")
+                </div>
+                
+                <h3>Basic Setup</h3>
+                <p>Follow these steps to get started with shinyTooltips:</p>
+                
+                <ol class="installation-steps">
+                    <li>
+                        <strong>Load the library:</strong>
+                        <div class="code-block" data-language="r">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            library(shinyTooltips)
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <strong>Initialize in your UI:</strong>
+                        <p>Add <code>use_shiny_tooltips()</code> to your Shiny UI to load the required JavaScript and CSS files.</p>
+                        <div class="code-block" data-language="r">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            ui <- fluidPage(
+                              use_shiny_tooltips(),
+                              # ... rest of your UI
+                            )
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <strong>Add tooltips to elements:</strong>
+                        <p>Use the <code>tooltip()</code> function to attach tooltips to elements.</p>
+                        <div class="code-block" data-language="r">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            tooltip("myButton", "Click to submit")
+                            actionButton("myButton", "Submit")
+                        </div>
+                    </li>
+                </ol>
+                
+                <h3>First Complete Example</h3>
+                <p>Here's a complete Shiny app with tooltips:</p>
+                <div class="code-block" data-language="r">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+library(shiny)
+library(shinyTooltips)
+
+ui <- fluidPage(
+  use_shiny_tooltips(),
+  
+  h1("Welcome!"),
+  
+  # Add tooltip to a button
+  tooltip("btn", "Click me!"),
+  actionButton("btn", "Click Me"),
+  
+  br(), br(),
+  
+  # Add tooltip to text input
+  tooltip("email", "Enter your email address", 
+          placement = "right", trigger = "focus"),
+  textInput("email", "Email:", ""),
+  
+  # Display output
+  textOutput("result")
+)
+
+server <- function(input, output, session) {
+  output$result <- renderText({
+    if (input$btn > 0) {
+      return(paste("Button clicked:", input$btn, "times"))
+    }
+    "Button not clicked yet"
+  })
+}
+
+shinyApp(ui, server)
+                    </div>
+                
+                <h3>Next Steps</h3>
+                <p>Now that you understand the basics:</p>
+                <ul class="checklist">
+                    <li>Explore different <strong>placements</strong> (top, bottom, left, right)</li>
+                    <li>Try different <strong>triggers</strong> (hover, click, focus)</li>
+                    <li>Customize with <strong>sizes</strong> (small, medium, large)</li>
+                    <li>Apply custom <strong>styles</strong> to match your theme</li>
+                    <li>Create <strong>rich content</strong> with tagList</li>
+                    <li>Build <strong>interactive tooltips</strong> with forms</li>
+                </ul>
+            </section>
+            
+            <!-- API Reference Section -->
+            <section id="api-reference" class="section">
+                <h2>API Reference</h2>
+                
+                <h3>use_shiny_tooltips()</h3>
+                <p>Initialize the tooltip system in your Shiny UI.</p>
+                
+                <div class="code-block" data-language="r">
+                    use_shiny_tooltips(theme = NULL)
+                </div>
+                
+                <h4>Parameters</h4>
+                <table class="parameter-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="param-name">theme</span></td>
+                            <td><span class="param-type">list</span></td>
+                            <td>NULL</td>
+                            <td>Named list of CSS properties for custom theme (e.g., <code>list(background = "#333", color = "#fff")</code>)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h4>Usage</h4>
+                <div class="code-block" data-language="r">
+# Basic initialization
+ui <- fluidPage(
+  use_shiny_tooltips(),
+  # ... rest of UI
+)
+
+# With custom theme
+ui <- fluidPage(
+  use_shiny_tooltips(theme = list(
+    background = "#2c3e50",
+    color = "#fff",
+    borderRadius = "8px"
+  )),
+  # ... rest of UI
+)
+                </div>
+                
+                <hr style="margin: 40px 0; border: none; border-top: 2px solid #e0e0e0;">
+                
+                <h3>tooltip()</h3>
+                <p>Attach a tooltip to a target element. Call this before the target element in your UI.</p>
+                
+                <div class="code-block" data-language="r">
+                    tooltip(
+                      target,
+                      content,
+                      placement = "top",
+                      trigger = "hover",
+                      animation = "fade",
+                      delay = 0,
+                      offset = 10,
+                      size = "medium",
+                      width = NULL,
+                      maxWidth = NULL,
+                      style = NULL,
+                      interactive = FALSE
+                    )
+                </div>
+                
+                <h4>Parameters</h4>
+                <table class="parameter-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="param-name">target</span></td>
+                            <td><span class="param-type">character</span></td>
+                            <td>—</td>
+                            <td>ID of the target element (required)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">content</span></td>
+                            <td><span class="param-type">character/tagList</span></td>
+                            <td>—</td>
+                            <td>Tooltip content (text, HTML, or tagList)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">placement</span></td>
+                            <td><span class="param-type">character</span></td>
+                            <td>"top"</td>
+                            <td>Tooltip position: "top", "bottom", "left", "right"</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">trigger</span></td>
+                            <td><span class="param-type">character</span></td>
+                            <td>"hover"</td>
+                            <td>Trigger type: "hover", "click", "focus"</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">animation</span></td>
+                            <td><span class="param-type">character</span></td>
+                            <td>"fade"</td>
+                            <td>Animation style: "fade", "scale"</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">delay</span></td>
+                            <td><span class="param-type">numeric</span></td>
+                            <td>0</td>
+                            <td>Delay in milliseconds before showing tooltip</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">offset</span></td>
+                            <td><span class="param-type">numeric</span></td>
+                            <td>10</td>
+                            <td>Distance in pixels between tooltip and target</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">size</span></td>
+                            <td><span class="param-type">character</span></td>
+                            <td>"medium"</td>
+                            <td>Predefined size: "small", "medium", "large", "auto"</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">width</span></td>
+                            <td><span class="param-type">character</span></td>
+                            <td>NULL</td>
+                            <td>Fixed width (e.g., "300px", "50%")</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">maxWidth</span></td>
+                            <td><span class="param-type">character</span></td>
+                            <td>NULL</td>
+                            <td>Maximum width (e.g., "500px")</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">style</span></td>
+                            <td><span class="param-type">character</span></td>
+                            <td>NULL</td>
+                            <td>Custom CSS styles (e.g., "background: #333; color: #fff;")</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">interactive</span></td>
+                            <td><span class="param-type">logical</span></td>
+                            <td>FALSE</td>
+                            <td>If TRUE, tooltip stays visible when hovering over it</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h4>Return Value</h4>
+                <p>Returns HTML code that should be placed in your UI. Call this <strong>before</strong> the target element.</p>
+                
+                <h4>Examples</h4>
+                <div class="example-grid">
+                    <div class="example-card">
+                        <h4>Basic</h4>
+                        <p>Simple text tooltip:</p>
+                        <div class="example-code">
+tooltip("btn", "Click me")
+actionButton("btn", "Button")
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h4>Rich Content</h4>
+                        <p>With HTML and tagList:</p>
+                        <div class="example-code">
+tooltip("btn",
+  tagList(
+    tags$b("Help"),
+    tags$p("Click to submit")
+  )
+)
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h4>Customized</h4>
+                        <p>With styling and placement:</p>
+                        <div class="example-code">
+tooltip("btn", "Submit form",
+  placement = "right",
+  style = "background: #2c3e50;"
+)
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h4>Interactive</h4>
+                        <p>With interactive form:</p>
+                        <div class="example-code">
+tooltip("btn",
+  tagList(
+    textInput("name", NULL),
+    actionButton("ok", "OK")
+  ),
+  interactive = TRUE
+)
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Examples Section -->
+            <section id="examples" class="section">
+                <h2>Examples</h2>
+                
+                <h3>1. Basic Button Tooltip</h3>
+                <p>The simplest example - a tooltip on a button:</p>
+                <div class="code-block" data-language="r">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+library(shiny)
+library(shinyTooltips)
+
+ui <- fluidPage(
+  use_shiny_tooltips(),
+  tooltip("btn", "This is a helpful message"),
+  actionButton("btn", "Hover over me")
+)
+
+server <- function(input, output, session) {}
+
+shinyApp(ui, server)
+                </div>
+                
+                <h3>2. Form with Contextual Help</h3>
+                <p>Add tooltips to form inputs for guidance:</p>
+                <div class="code-block" data-language="r">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+library(shiny)
+library(shinyTooltips)
+
+ui <- fluidPage(
+  use_shiny_tooltips(),
+  h2("Sign Up Form"),
+  
+  tooltip("email", "Enter a valid email address",
+    placement = "right", trigger = "focus"),
+  textInput("email", "Email:"),
+  
+  br(),
+  
+  tooltip("password", "Minimum 8 characters",
+    placement = "right", trigger = "focus"),
+  passwordInput("password", "Password:"),
+  
+  br(),
+  
+  actionButton("submit", "Sign Up")
+)
+
+server <- function(input, output, session) {}
+
+shinyApp(ui, server)
+                </div>
+                
+                <h3>3. Rich Content with Tags</h3>
+                <p>Create complex, formatted tooltip content:</p>
+                <div class="code-block" data-language="r">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+library(shiny)
+library(shinyTooltips)
+
+ui <- fluidPage(
+  use_shiny_tooltips(),
+  tooltip(
+    "info",
+    tagList(
+      tags$h4("What is this?"),
+      tags$p("This is a tooltip with:"),
+      tags$ul(
+        tags$li("Rich formatting"),
+        tags$li("HTML elements"),
+        tags$li("Custom styling")
+      )
+    ),
+    width = "250px"
+  ),
+  actionButton("info", "Info")
+)
+
+server <- function(input, output, session) {}
+
+shinyApp(ui, server)
+                </div>
+                
+                <h3>4. Interactive Tooltip with Input</h3>
+                <p>Tooltip with interactive form controls:</p>
+                <div class="code-block" data-language="r">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+library(shiny)
+library(shinyTooltips)
+
+ui <- fluidPage(
+  use_shiny_tooltips(),
+  
+  tooltip(
+    "settings",
+    tagList(
+      h4("Quick Settings"),
+      textInput("setting_name", "Name:", width = "100%"),
+      selectInput("setting_theme", "Theme:", 
+        choices = c("Light", "Dark"), width = "100%"),
+      actionButton("save", "Save", style = "width: 100%;")
+    ),
+    width = "280px",
+    interactive = TRUE,
+    trigger = "click"
+  ),
+  
+  actionButton("settings", "Open Settings"),
+  br(), br(),
+  textOutput("settings_result")
+)
+
+server <- function(input, output, session) {
+  output$settings_result <- renderText({
+    if (input$save > 0) {
+      paste("Settings saved: Name =", input$setting_name,
+            ", Theme =", input$setting_theme)
+    } else {
+      "No settings saved yet"
+    }
+  })
+}
+
+shinyApp(ui, server)
+                </div>
+                
+                <h3>5. All Placements Showcase</h3>
+                <p>Demonstrate all four tooltip placements:</p>
+                <div class="code-block" data-language="r">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+library(shiny)
+library(shinyTooltips)
+
+ui <- fluidPage(
+  use_shiny_tooltips(),
+  
+  h2("Tooltip Placements"),
+  
+  div(style = "display: flex; gap: 20px; justify-content: center; margin: 40px 0;",
+    div(
+      tooltip("top", "Top placement", placement = "top"),
+      actionButton("top", "Top")
+    ),
+    div(
+      tooltip("right", "Right placement", placement = "right"),
+      actionButton("right", "Right")
+    ),
+    div(
+      tooltip("bottom", "Bottom placement", placement = "bottom"),
+      actionButton("bottom", "Bottom")
+    ),
+    div(
+      tooltip("left", "Left placement", placement = "left"),
+      actionButton("left", "Left")
+    )
+  )
+)
+
+server <- function(input, output, session) {}
+
+shinyApp(ui, server)
+                </div>
+                
+                <h3>6. Styled Tooltips</h3>
+                <p>Apply custom styles to tooltips:</p>
+                <div class="code-block" data-language="r">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+library(shiny)
+library(shinyTooltips)
+
+ui <- fluidPage(
+  use_shiny_tooltips(),
+  
+  h2("Styled Tooltips"),
+  
+  div(style = "display: flex; gap: 20px;",
+    div(
+      tooltip("success", "Success!",
+        style = "background: #27ae60; color: white; font-weight: bold;"),
+      actionButton("success", "Success")
+    ),
+    
+    div(
+      tooltip("warning", "Warning!",
+        style = "background: #f39c12; color: white; font-weight: bold;"),
+      actionButton("warning", "Warning")
+    ),
+    
+    div(
+      tooltip("danger", "Danger!",
+        style = "background: #e74c3c; color: white; font-weight: bold;"),
+      actionButton("danger", "Danger")
+    ),
+    
+    div(
+      tooltip("info", "Information",
+        style = "background: linear-gradient(135deg, #667eea, #764ba2); color: white;"),
+      actionButton("info", "Info")
+    )
+  )
+)
+
+server <- function(input, output, session) {}
+
+shinyApp(ui, server)
+                </div>
+            </section>
+            
+            <!-- Best Practices Section -->
+            <section id="best-practices" class="section">
+                <h2>Best Practices</h2>
+                
+                <h3>Content Guidelines</h3>
+                <div class="tip">
+                    <strong>Tip:</strong> Keep tooltip content concise. A single sentence or short phrase is ideal. If you need more space, use rich content with tagList.
+                </div>
+                
+                <ul class="checklist">
+                    <li>Use clear, actionable language</li>
+                    <li>Keep text to 1-2 lines when possible</li>
+                    <li>Avoid repeating button or label text</li>
+                    <li>Don't hide critical information in tooltips only</li>
+                    <li>Use simple language, avoid jargon</li>
+                </ul>
+                
+                <h3>Placement Guidelines</h3>
+                <div class="highlight">
+                    <strong>Note:</strong> The library automatically adjusts tooltip position to keep it in the viewport. However, planning placements can improve perceived layout.
+                </div>
+                
+                <ul class="checklist">
+                    <li>Use <code>placement = "bottom"</code> for top-of-page buttons</li>
+                    <li>Use <code>placement = "right"</code> for left-side inputs</li>
+                    <li>Avoid placements that cause tooltips to overlap page edges</li>
+                    <li>Be consistent with placement across related elements</li>
+                </ul>
+                
+                <h3>Trigger Guidelines</h3>
+                <ul class="checklist">
+                    <li>Use <code>trigger = "hover"</code> for buttons and link-like elements</li>
+                    <li>Use <code>trigger = "focus"</code> for form inputs (text, password, select)</li>
+                    <li>Use <code>trigger = "click"</code> for important information users should explicitly access</li>
+                    <li>Use <code>trigger = "click"</code> for interactive tooltips with forms</li>
+                </ul>
+                
+                <h3>Styling Guidelines</h3>
+                <div class="tip">
+                    <strong>Tip:</strong> Use custom styles to match your app's design system. Consistent styling improves usability.
+                </div>
+                
+                <ul class="checklist">
+                    <li>Use <code>use_shiny_tooltips(theme = ...)</code> to set a global theme</li>
+                    <li>Apply consistent colors across your app's tooltips</li>
+                    <li>Ensure sufficient contrast for accessibility (WCAG AA minimum)</li>
+                    <li>Use size variants to match your content length</li>
+                    <li>Test on different screen sizes and devices</li>
+                </ul>
+                
+                <h3>Performance Considerations</h3>
+                <ul class="checklist">
+                    <li>Lazy load tooltips for many elements (consider pagination)</li>
+                    <li>Use simple content for better performance</li>
+                    <li>Avoid complex reactive expressions inside tooltips</li>
+                    <li>Set appropriate delays to prevent flickering</li>
+                </ul>
+                
+                <h3>Accessibility Guidelines</h3>
+                <div class="warning">
+                    <strong>Important:</strong> Tooltips should enhance, not replace, accessibility features.
+                </div>
+                
+                <ul class="checklist">
+                    <li>Ensure keyboard navigation works (use <code>trigger = "focus"</code>)</li>
+                    <li>Maintain sufficient color contrast</li>
+                    <li>Don't rely solely on tooltips for critical information</li>
+                    <li>Test with screen readers</li>
+                    <li>Ensure tooltip text is readable at 200% zoom</li>
+                </ul>
+                
+                <h3>Mobile Considerations</h3>
+                <ul class="checklist">
+                    <li>Test tooltip visibility on small screens</li>
+                    <li>Consider <code>trigger = "click"</code> instead of "hover" on mobile</li>
+                    <li>Ensure tooltips don't block important content</li>
+                    <li>Use <code>interactive = TRUE</code> carefully on touch devices</li>
+                </ul>
+                
+                <h3>Real-World Example Pattern</h3>
+                <p>Here's a recommended pattern for form tooltips:</p>
+                <div class="code-block" data-language="r">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Good pattern for form help tooltips
+div(class = "form-group",
+  div(
+    tooltip("email", "Enter a valid email (e.g., user@example.com)",
+      placement = "right", trigger = "focus"),
+    textInput("email", label = "Email Address:", width = "100%")
+  )
+)
+                </div>
+            </section>
+            
+            <!-- FAQ & Troubleshooting Section -->
+            <section id="faq" class="section">
+                <h2>FAQ & Troubleshooting</h2>
+                
+                <h3>Frequently Asked Questions</h3>
+                
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item question">
+                        <strong>Q: Do I need to call tooltip() before or after the target element?</strong>
+                    </div>
+                    <div class="troubleshooting-item answer">
+                        <strong>A:</strong> Call <code>tooltip()</code> immediately before the target element in your UI. The order matters!
+                        <div class="code-block" data-language="r">
+# Correct
+tooltip("btn", "Help text")
+actionButton("btn", "Click me")
+
+# Incorrect
+actionButton("btn", "Click me")
+tooltip("btn", "Help text")
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item question">
+                        <strong>Q: How do I create an interactive tooltip with forms?</strong>
+                    </div>
+                    <div class="troubleshooting-item answer">
+                        <strong>A:</strong> Set <code>interactive = TRUE</code> and use <code>tagList</code> for rich content:
+                        <div class="code-block" data-language="r">
+tooltip("btn",
+  tagList(
+    textInput("name", "Name:"),
+    actionButton("submit", "Submit")
+  ),
+  interactive = TRUE,
+  trigger = "click"
+)
+actionButton("btn", "Settings")
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item question">
+                        <strong>Q: My tooltip is not appearing. What should I do?</strong>
+                    </div>
+                    <div class="troubleshooting-item answer">
+                        <strong>A:</strong> Check these common issues:
+                        <ol>
+                            <li>Did you call <code>use_shiny_tooltips()</code> in your UI?</li>
+                            <li>Is the target element ID correct? (Must match exactly)</li>
+                            <li>Is <code>tooltip()</code> placed before the target element?</li>
+                            <li>Does the target element exist in the DOM?</li>
+                            <li>Check your browser console for JavaScript errors</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item question">
+                        <strong>Q: Can I use shinyTooltips with renderUI or dynamic content?</strong>
+                    </div>
+                    <div class="troubleshooting-item answer">
+                        <strong>A:</strong> Yes, but add <code>use_shiny_tooltips()</code> only once in the main UI. For dynamically added tooltips, ensure the target elements are rendered and tooltip definitions are loaded correctly.
+                    </div>
+                </div>
+                
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item question">
+                        <strong>Q: How do I style tooltips to match my app theme?</strong>
+                    </div>
+                    <div class="troubleshooting-item answer">
+                        <strong>A:</strong> Use the <code>theme</code> parameter in <code>use_shiny_tooltips()</code>:
+                        <div class="code-block" data-language="r">
+use_shiny_tooltips(theme = list(
+  background = "#2c3e50",
+  color = "#ffffff",
+  borderRadius = "8px",
+  fontSize = "14px"
+))
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item question">
+                        <strong>Q: What's the difference between size and width parameters?</strong>
+                    </div>
+                    <div class="troubleshooting-item answer">
+                        <strong>A:</strong> Use size for predefined dimensions, width for exact values:
+                        <div class="code-block" data-language="r">
+# Predefined sizes
+tooltip("btn", "Short", size = "small")
+tooltip("btn", "Medium", size = "medium")
+tooltip("btn", "Long content here", size = "large")
+
+# Custom size
+tooltip("btn", "Exactly 350px", width = "350px")
+tooltip("btn", "Max 500px", maxWidth = "500px")
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>Troubleshooting Common Issues</h3>
+                
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item question">
+                        <strong>Issue: Tooltip appears outside the viewport</strong>
+                    </div>
+                    <div class="troubleshooting-item answer">
+                        The library automatically adjusts position. If it still occurs:
+                        <ul>
+                            <li>Try different <code>placement</code> values</li>
+                            <li>Reduce <code>offset</code> value</li>
+                            <li>Use smaller <code>size</code> or <code>width</code></li>
+                            <li>Increase viewport by using responsive design</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item question">
+                        <strong>Issue: Tooltip content is not rendering HTML</strong>
+                    </div>
+                    <div class="troubleshooting-item answer">
+                        Use <code>tagList</code> from htmltools for rich content:
+                        <div class="code-block" data-language="r">
+# This won't work (HTML not rendered)
+tooltip("btn", "<b>Bold text</b>")
+
+# This works (proper HTML)
+tooltip("btn", tagList(
+  tags$b("Bold text")
+))
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item question">
+                        <strong>Issue: Interactive tooltip closes unexpectedly</strong>
+                    </div>
+                    <div class="troubleshooting-item answer">
+                        When using <code>interactive = TRUE</code>:
+                        <ul>
+                            <li>Ensure tooltip stays visible when hovering over it</li>
+                            <li>Check that content doesn't disappear on scroll</li>
+                            <li>Test with <code>trigger = "click"</code> for better control</li>
+                            <li>Set appropriate <code>delay</code> value</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item question">
+                        <strong>Issue: Styling not applying to tooltip</strong>
+                    </div>
+                    <div class="troubleshooting-item answer">
+                        CSS properties must be in JavaScript camelCase format:
+                        <div class="code-block" data-language="r">
+# Wrong (hyphens)
+style = "background-color: #333;"
+
+# Correct (camelCase)
+style = "backgroundColor: #333;"
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>Getting Help</h3>
+                <div class="info">
+                    <strong>Need more help?</strong>
+                    <ul>
+                        <li>Check the <a href="#" style="color: #17a2b8; text-decoration: underline;">GitHub Issues</a> for reported problems</li>
+                        <li>Read the <a href="#" style="color: #17a2b8; text-decoration: underline;">documentation</a> for detailed explanations</li>
+                        <li>Review the <a href="#" style="color: #17a2b8; text-decoration: underline;">example applications</a> for working code</li>
+                        <li>Submit a new <a href="#" style="color: #17a2b8; text-decoration: underline;">issue</a> if you found a bug</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+        
+        <footer>
+            <p><strong>shinyTooltips v0.2.0</strong> - Modern Interactive Tooltips for Shiny</p>
+            <p>Lightweight • Customizable • Interactive • Accessible</p>
+            <p>
+                <a href="#">GitHub</a> | 
+                <a href="#">Documentation</a> | 
+                <a href="#">Examples</a> | 
+                <a href="#">Issues</a>
+            </p>
+            <p style="margin-top: 20px; font-size: 12px; opacity: 0.8;">
+                © 2024 shinyTooltips Contributors. Licensed under MIT License.
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        // Navigation
+        document.querySelectorAll('.nav-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const sectionId = this.getAttribute('data-section');
+                
+                // Remove active class from all buttons and sections
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding section
+                this.classList.add('active');
+                document.getElementById(sectionId).classList.add('active');
+                
+                // Scroll to top
+                document.querySelector('.content').scrollTop = 0;
+            });
+        });
+        
+        // Copy to clipboard functionality
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const text = codeBlock.textContent.replace('Copy', '').trim();
+            
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = '✓ Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                button.textContent = 'Failed';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+        
+        // Smooth scrolling for hash links
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    e.preventDefault();
+                    const section = document.querySelector(href);
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
